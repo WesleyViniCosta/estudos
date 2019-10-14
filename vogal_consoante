@@ -1,0 +1,28 @@
+import java.util.Scanner;
+
+public class a{
+    public static void main(String[] args) {
+        Scanner scan = new Scanner(System.in);
+
+        String[] vogais= {"a","e","i","o","u"};
+        
+        String letra = "0";
+        while(!letra.equalsIgnoreCase("sair")){
+            System.out.print("Digite uma letra (digite sair para sair): ");
+            letra = scan.nextLine();
+            
+            for(int i=0; i < vogais.length; i++){
+                if (vogais[i].equalsIgnoreCase(letra)) {
+                    System.out.println("\nA letra "+letra+" é vogal\n");
+                    break;
+                }if(i==vogais.length-1){
+                    System.out.println("\nA letra "+letra+" é consoante\n");
+                    break;
+                }if(letra.equalsIgnoreCase("sair")){
+                    System.out.println("\nXau!");
+                    break;
+                }
+            }
+        }
+    }
+}
