@@ -1,4 +1,4 @@
-package aulas;
+package aula3;
 
 public class Candidato {
     private String nome;
@@ -12,23 +12,22 @@ public class Candidato {
     }
 
     public String getNome() {
-        return this.nome;
+        return nome;
     }
 
     public int getNumero() {
-        return this.numero;
+        return numero;
     }
 
     public int getVotos() {
-        return this.votos;
+        return votos;
     }
 
     public void recebeVotos() {
-        this.votos++;
+        votos++;
     }	
     
-    @Override
     public String toString() {
-       return " Nome: "+ this.getNome()+" | Numero: "+ this.getNumero()+"\n Votos: "+ getVotos();
+       return " Nome: " + getNome() + " | Numero: "+ getNumero() + "\n Votos: " + getVotos();
     }
 }
