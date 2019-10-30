@@ -23,13 +23,12 @@ public class Candidato {
         return this.votos;
     }
 
-    public int recebeVotos() {
+    public void recebeVotos() {
         this.votos++;
-        return votos;
     }	
     
-    /*@Override
+    @Override
     public String toString() {
-       return this.getNome()+", Numero: "+ this.getNumero()+"\n votos: "+ getVotos();
-    }*/
+       return " Nome: "+ this.getNome()+" | Numero: "+ this.getNumero()+"\n Votos: "+ getVotos();
+    }
 }
