@@ -1,0 +1,93 @@
+#include <stdio.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "driver/ledc.h"
+#include "esp_err.h"
+#include <driver/adc.h>
+
+#define BUZZER        33
+#define BUZZER_SPEED  LEDC_HIGH_SPEED_MODE
+#define SENSOR        ADC2_CHANNEL_7
+#define LED           26
+#define LED_DUTY      400
+#define TEMPO         1000
+#define a             440 //Nota Lá
+#define d             588 //Nota Ré
+
+int valor; //Variável que armazena o valor detectado pelo sensor
+
+void app_main() {
+  //Configuração do buzzer
+  ledc_timer_config_t buzzer_timer = {
+      .speed_mode      = LEDC_HIGH_SPEED_MODE,
+      .duty_resolution = LEDC_TIMER_9_BIT,
+      .timer_num       = LEDC_TIMER_1,
+      .freq_hz         = 440,
+  };
+	ledc_timer_config(&buzzer_timer);
+
+	ledc_channel_config_t buzzer_conf = { 
+      .gpio_num   = 33,
+      .speed_mode = BUZZER_SPEED,
+      .channel    = LEDC_CHANNEL_1,
+      .timer_sel  = LEDC_TIMER_1,
+      .duty       = 0,
+  };
+	ledc_channel_config(&buzzer_conf);
+
+  //Configuração do led
+  ledc_timer_config_t ledc_timer = {
+    .duty_resolution = LEDC_TIMER_9_BIT,
+    .freq_hz = 500,
+    .speed_mode = LEDC_HIGH_SPEED_MODE,
+    .timer_num = LEDC_TIMER_0,
+  };
+  ledc_timer_config(&ledc_timer);
+
+  ledc_channel_config_t ledc_channel = {
+    .channel = LEDC_CHANNEL_0,
+    .duty = 0,
+    .gpio_num = LED,
+    .speed_mode = LEDC_HIGH_SPEED_MODE,
+    .hpoint = 0,
+    .timer_sel = LEDC_TIMER_0
+  };
+  ledc_channel_config( &ledc_channel);
+  ledc_fade_func_install(0);
+
+  //Início do loop
+  while (1) {
+    adc2_get_raw(SENSOR, ADC_WIDTH_12Bit, & valor); //Faz leitura do sensor
+    printf("Valor: %d\n", valor);
+
+    if (valor > 700) {
+      //Fade up do led
+      ledc_set_fade_with_time(ledc_channel.speed_mode, ledc_channel.channel, LED_DUTY, TEMPO);
+      ledc_fade_start(ledc_channel.speed_mode, ledc_channel.channel, LEDC_FADE_NO_WAIT);
+      //Buzzer
+      ledc_set_freq(buzzer_conf.speed_mode, buzzer_timer.timer_num, d); //Toca a nota ré
+      ledc_set_duty(BUZZER_SPEED, LEDC_CHANNEL_1, 50);
+      ledc_update_duty(BUZZER_SPEED, LEDC_CHANNEL_1);
+      
+      vTaskDelay(TEMPO / portTICK_PERIOD_MS);
+      //Fade down do led
+      ledc_set_fade_with_time(ledc_channel.speed_mode, ledc_channel.channel, 0, TEMPO);
+      ledc_fade_start(ledc_channel.speed_mode, ledc_channel.channel, LEDC_FADE_NO_WAIT);
+      //Buzzer
+      ledc_set_freq(buzzer_conf.speed_mode, buzzer_timer.timer_num, a); //Toca a nota lá
+      ledc_set_duty(BUZZER_SPEED, LEDC_CHANNEL_1, 50);
+      ledc_update_duty(BUZZER_SPEED, LEDC_CHANNEL_1);
+
+      vTaskDelay(TEMPO / portTICK_PERIOD_MS); 
+    } else {
+      //Desliga o led
+      ledc_set_duty(ledc_channel.speed_mode, ledc_channel.channel, 0);
+      ledc_update_duty(ledc_channel.speed_mode, ledc_channel.channel);
+      
+      //Desliga o Buzzer
+      ledc_set_duty(BUZZER_SPEED, LEDC_CHANNEL_1, 0);
+      ledc_update_duty(BUZZER_SPEED, LEDC_CHANNEL_1);
+      vTaskDelay(TEMPO / portTICK_PERIOD_MS);
+    }
+  }
+}
